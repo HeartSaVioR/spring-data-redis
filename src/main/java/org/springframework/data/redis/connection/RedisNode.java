@@ -15,21 +15,25 @@
  */
 package org.springframework.data.redis.connection;
 
+import org.springframework.util.Assert;
 import org.springframework.util.ObjectUtils;
 
 /**
  * @author Christoph Strobl
  * @since 1.4
  */
-public class RedisNode {
+public class RedisNode implements NamedNode {
 
-	private final String host;
-	private final int port;
+	private String name;
+	private String host;
+	private int port;
 
 	public RedisNode(String host, int port) {
 		this.host = host;
 		this.port = port;
 	}
+
+	protected RedisNode() {}
 
 	public String getHost() {
 		return host;
@@ -41,6 +45,11 @@ public class RedisNode {
 
 	public String asString() {
 		return host + ":" + port;
+	}
+
+	@Override
+	public String getName() {
+		return this.name;
 	}
 
 	@Override
@@ -77,7 +86,37 @@ public class RedisNode {
 			return false;
 		}
 
+		if (!ObjectUtils.nullSafeEquals(this.name, other.name)) {
+			return false;
+		}
+
 		return true;
+	}
+
+	public static class RedisNodeBuilder {
+
+		private RedisNode node;
+
+		public RedisNodeBuilder() {
+			node = new RedisNode();
+		}
+
+		public RedisNodeBuilder withName(String name) {
+			node.name = name;
+			return this;
+		}
+
+		public RedisNodeBuilder listeningAt(String host, int port) {
+
+			Assert.hasText(host, "Hostname must not be empty or null.");
+			node.host = host;
+			node.port = port;
+			return this;
+		}
+
+		public RedisNode build() {
+			return this.node;
+		}
 	}
 
 }
