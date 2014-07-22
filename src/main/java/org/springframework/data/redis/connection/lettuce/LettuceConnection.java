@@ -42,10 +42,10 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.QueryTimeoutException;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.connection.AbstractRedisConnection;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.FutureResult;
 import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisPipelineException;
 import org.springframework.data.redis.connection.RedisSubscribedConnectionException;
 import org.springframework.data.redis.connection.ReturnType;
@@ -98,7 +98,7 @@ import com.lambdaworks.redis.pubsub.RedisPubSubConnection;
  * @author Christoph Strobl
  * @author Thomas Darimont
  */
-public class LettuceConnection implements RedisConnection {
+public class LettuceConnection extends AbstractRedisConnection {
 
 	static final RedisCodec<byte[], byte[]> CODEC = new BytesRedisCodec();
 	private static final TypeHints typeHints = new TypeHints();

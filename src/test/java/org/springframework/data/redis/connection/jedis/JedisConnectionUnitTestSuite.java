@@ -29,11 +29,10 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 import org.mockito.ArgumentCaptor;
+import org.springframework.dao.InvalidDataAccessResourceUsageException;
 import org.springframework.data.redis.connection.AbstractConnectionUnitTestBase;
-import org.springframework.data.redis.connection.RedisNode.RedisNodeBuilder;
 import org.springframework.data.redis.connection.RedisServerCommands.ShutdownOption;
 import org.springframework.data.redis.connection.jedis.JedisConnectionUnitTestSuite.JedisConnectionPipelineUnitTests;
-import org.springframework.data.redis.connection.jedis.JedisConnectionUnitTestSuite.JedisConnectionSentinelTests;
 import org.springframework.data.redis.connection.jedis.JedisConnectionUnitTestSuite.JedisConnectionUnitTests;
 import org.springframework.data.redis.core.TimeoutUtils;
 
@@ -44,8 +43,7 @@ import redis.clients.jedis.Jedis;
  * @author Christoph Strobl
  */
 @RunWith(Suite.class)
-@SuiteClasses({ JedisConnectionUnitTests.class, JedisConnectionPipelineUnitTests.class,
-		JedisConnectionSentinelTests.class })
+@SuiteClasses({ JedisConnectionUnitTests.class, JedisConnectionPipelineUnitTests.class })
 public class JedisConnectionUnitTestSuite {
 
 	public static class JedisConnectionUnitTests extends AbstractConnectionUnitTestBase<Client> {
@@ -164,6 +162,15 @@ public class JedisConnectionUnitTestSuite {
 			connection.slaveOfNoOne();
 			verifyNativeConnectionInvocation().slaveofNoOne();
 		}
+
+		/**
+		 * @see DATAREDIS-330
+		 */
+		@Test(expected = InvalidDataAccessResourceUsageException.class)
+		public void shouldThrowExceptionWhenAccessingRedisSentinelsCommandsWhenNoSentinelsConfigured() {
+			connection.getSentinelCommands();
+		}
+
 	}
 
 	public static class JedisConnectionPipelineUnitTests extends JedisConnectionUnitTests {
@@ -228,44 +235,44 @@ public class JedisConnectionUnitTestSuite {
 
 	}
 
-	public static class JedisConnectionSentinelTests extends AbstractConnectionUnitTestBase<Client> {
-
-		protected JedisConnection connection;
-		private Jedis jedisSpy;
-
-		@Before
-		public void setUp() {
-
-			jedisSpy = spy(new MockedClientJedis("http://localhost:1234", getNativeRedisConnectionMock()));
-			connection = new JedisConnection(jedisSpy);
-		}
-
-		/**
-		 * @see DATAREDIS-324
-		 */
-		@Test
-		public void failoverShouldBeSentCorrectly() {
-
-			connection.sentinelFailover(new RedisNodeBuilder().withName("mymaster").build());
-			verify(jedisSpy, times(1)).sentinelFailover(eq("mymaster"));
-		}
-
-		/**
-		 * @see DATAREDIS-324
-		 */
-		@Test(expected = IllegalArgumentException.class)
-		public void failoverShouldThrowExceptionIfMasterNodeIsNull() {
-			connection.sentinelFailover(null);
-		}
-
-		/**
-		 * @see DATAREDIS-324
-		 */
-		@Test(expected = IllegalArgumentException.class)
-		public void failoverShouldThrowExceptionIfMasterNodeNameIsEmpty() {
-			connection.sentinelFailover(new RedisNodeBuilder().build());
-		}
-	}
+	// public static class JedisConnectionSentinelTests extends AbstractConnectionUnitTestBase<Client> {
+	//
+	// protected JedisConnection connection;
+	// private Jedis jedisSpy;
+	//
+	// @Before
+	// public void setUp() {
+	//
+	// jedisSpy = spy(new MockedClientJedis("http://localhost:1234", getNativeRedisConnectionMock()));
+	// connection = new JedisConnection(jedisSpy);
+	// }
+	//
+	// /**
+	// * @see DATAREDIS-324
+	// */
+	// @Test
+	// public void failoverShouldBeSentCorrectly() {
+	//
+	// connection.sentinelFailover(new RedisNodeBuilder().withName("mymaster").build());
+	// verify(jedisSpy, times(1)).sentinelFailover(eq("mymaster"));
+	// }
+	//
+	// /**
+	// * @see DATAREDIS-324
+	// */
+	// @Test(expected = IllegalArgumentException.class)
+	// public void failoverShouldThrowExceptionIfMasterNodeIsNull() {
+	// connection.sentinelFailover(null);
+	// }
+	//
+	// /**
+	// * @see DATAREDIS-324
+	// */
+	// @Test(expected = IllegalArgumentException.class)
+	// public void failoverShouldThrowExceptionIfMasterNodeNameIsEmpty() {
+	// connection.sentinelFailover(new RedisNodeBuilder().build());
+	// }
+	// }
 
 	/**
 	 * {@link Jedis} extension allowing to use mocked object as {@link Client}.

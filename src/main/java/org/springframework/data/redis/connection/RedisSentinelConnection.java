@@ -15,16 +15,7 @@
  */
 package org.springframework.data.redis.connection;
 
-import java.util.Collection;
 
-/**
- * @author Christoph Strobl
- * @since 1.4
- */
-public interface RedisSentinelCommands {
-
-	void sentinelFailover(NamedNode master);
-
-	Collection<RedisServer> sentinelMasters();
+public interface RedisSentinelConnection extends RedisSentinelCommands {
 
 }

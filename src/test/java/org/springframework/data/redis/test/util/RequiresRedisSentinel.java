@@ -13,18 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data.redis.connection;
+package org.springframework.data.redis.test.util;
 
-import java.util.Collection;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import org.springframework.data.redis.test.util.RedisSentinelRule.SentinelsAvailable;
 
 /**
  * @author Christoph Strobl
- * @since 1.4
  */
-public interface RedisSentinelCommands {
+@Documented
+@Target({ ElementType.METHOD })
+@Retention(RetentionPolicy.RUNTIME)
+public @interface RequiresRedisSentinel {
 
-	void sentinelFailover(NamedNode master);
-
-	Collection<RedisServer> sentinelMasters();
+	SentinelsAvailable value() default SentinelsAvailable.ALL_ACTIVE;
 
 }

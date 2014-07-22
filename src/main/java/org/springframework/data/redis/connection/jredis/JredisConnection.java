@@ -37,10 +37,12 @@ import org.jredis.protocol.Command;
 import org.jredis.ri.alphazero.JRedisSupport;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.RedisSystemException;
+import org.springframework.data.redis.connection.AbstractRedisConnection;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.Pool;
-import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisServerCommands.ShutdownOption;
+import org.springframework.data.redis.connection.RedisStringCommands.BitOperation;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.connection.SortParameters;
 import org.springframework.data.redis.connection.Subscription;
@@ -59,7 +61,7 @@ import org.springframework.util.ReflectionUtils;
  * @author Christoph Strobl
  * @author Thomas Darimont
  */
-public class JredisConnection implements RedisConnection {
+public class JredisConnection extends AbstractRedisConnection {
 
 	private static final Method SERVICE_REQUEST;
 
@@ -1275,4 +1277,5 @@ public class JredisConnection implements RedisConnection {
 	public Cursor<Entry<byte[], byte[]>> hScan(byte[] key, ScanOptions options) {
 		throw new UnsupportedOperationException("'HSCAN' command is not uspported for jredis");
 	}
+
 }

@@ -29,15 +29,15 @@ import redis.clients.jedis.Jedis;
  */
 public class RedisSentinelRule implements TestRule {
 
-	enum VerificationMode {
-		ALL_ACTIVE, ONE_ACTIVE, NO_SENTINEL
+	public enum SentinelsAvailable {
+		ALL_ACTIVE, ONE_ACTIVE, NONE_ACTIVE
 	}
 
 	private static final RedisSentinelConfiguration DEFAULT_SENTINEL_CONFIG = new RedisSentinelConfiguration()
 			.master("mymaster").sentinel("127.0.0.1", 26379).sentinel("127.0.0.1", 26380).sentinel("127.0.0.1", 26381);
 
 	private RedisSentinelConfiguration sentinelConfig;
-	private VerificationMode mode = VerificationMode.ALL_ACTIVE;
+	private SentinelsAvailable requiredSentinels = null; // VerificationMode.ALL_ACTIVE;
 
 	protected RedisSentinelRule(RedisSentinelConfiguration config) {
 		this.sentinelConfig = config;
@@ -63,7 +63,7 @@ public class RedisSentinelRule implements TestRule {
 	}
 
 	public RedisSentinelRule sentinelsDisabled() {
-		this.mode = VerificationMode.NO_SENTINEL;
+		this.requiredSentinels = SentinelsAvailable.NONE_ACTIVE;
 		return this;
 	}
 
@@ -73,7 +73,7 @@ public class RedisSentinelRule implements TestRule {
 	 * @return
 	 */
 	public RedisSentinelRule allActive() {
-		this.mode = VerificationMode.ALL_ACTIVE;
+		this.requiredSentinels = SentinelsAvailable.ALL_ACTIVE;
 		return this;
 	}
 
@@ -83,24 +83,45 @@ public class RedisSentinelRule implements TestRule {
 	 * @return
 	 */
 	public RedisSentinelRule oneActive() {
-		this.mode = VerificationMode.ONE_ACTIVE;
+		this.requiredSentinels = SentinelsAvailable.ONE_ACTIVE;
+		return this;
+	}
+
+	/**
+	 * Will only check {@link RedisSentinelConfiguration} configuration in case {@link RequiresRedisSentinel} is detected
+	 * on test method.
+	 * 
+	 * @return
+	 */
+	public RedisSentinelRule dynamicModeSelection() {
+		this.requiredSentinels = null;
 		return this;
 	}
 
 	@Override
-	public Statement apply(final Statement base, Description description) {
+	public Statement apply(final Statement base, final Description description) {
 
 		return new Statement() {
 
 			@Override
 			public void evaluate() throws Throwable {
-				verify();
+
+				if (description.isTest()) {
+					RequiresRedisSentinel sentinels = description.getAnnotation(RequiresRedisSentinel.class);
+					if (RedisSentinelRule.this.requiredSentinels != null || sentinels != null) {
+						verify(sentinels != null ? sentinels.value() : RedisSentinelRule.this.requiredSentinels);
+					}
+
+				} else {
+					verify(RedisSentinelRule.this.requiredSentinels);
+				}
+
 				base.evaluate();
 			}
 		};
 	}
 
-	private void verify() {
+	private void verify(SentinelsAvailable verificationMode) {
 
 		int failed = 0;
 		for (RedisNode node : sentinelConfig.getSentinels()) {
@@ -110,19 +131,19 @@ public class RedisSentinelRule implements TestRule {
 		}
 
 		if (failed > 0) {
-			if (VerificationMode.ALL_ACTIVE.equals(mode)) {
+			if (SentinelsAvailable.ALL_ACTIVE.equals(verificationMode)) {
 				throw new AssumptionViolatedException(String.format(
 						"Expected all Redis Sentinels to respone but %s of %s did not responde", failed, sentinelConfig
 								.getSentinels().size()));
 			}
 
-			if (VerificationMode.ONE_ACTIVE.equals(mode) && sentinelConfig.getSentinels().size() - 1 < failed) {
+			if (SentinelsAvailable.ONE_ACTIVE.equals(verificationMode) && sentinelConfig.getSentinels().size() - 1 < failed) {
 				throw new AssumptionViolatedException(
 						"Expected at least one sentinel to respond but it seems all are offline - Game Over!");
 			}
 		}
 
-		if (VerificationMode.NO_SENTINEL.equals(mode) && failed != sentinelConfig.getSentinels().size()) {
+		if (SentinelsAvailable.NONE_ACTIVE.equals(verificationMode) && failed != sentinelConfig.getSentinels().size()) {
 			throw new AssumptionViolatedException(String.format(
 					"Expected to have no sentinels online but found that %s are still alive.", (sentinelConfig.getSentinels()
 							.size() - failed)));

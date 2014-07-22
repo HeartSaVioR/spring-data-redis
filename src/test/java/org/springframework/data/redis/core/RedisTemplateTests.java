@@ -93,6 +93,7 @@ public class RedisTemplateTests<K, V> {
 
 	@Parameters
 	public static Collection<Object[]> testParams() {
+
 		return AbstractOperationsTestParams.testParams();
 	}
 

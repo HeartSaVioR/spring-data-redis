@@ -2380,4 +2380,9 @@ public class DefaultStringRedisConnection implements StringRedisConnection {
 				new TupleConverter());
 	}
 
+	@Override
+	public RedisSentinelCommands getSentinelCommands() {
+		return delegate.getSentinelCommands();
+	}
+
 }

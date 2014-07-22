@@ -15,6 +15,11 @@
  */
 package org.springframework.data.redis.connection.jedis;
 
+import static org.hamcrest.core.Is.*;
+import static org.junit.Assert.*;
+
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -23,6 +28,7 @@ import org.junit.Test;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.data.redis.connection.AbstractConnectionIntegrationTests;
 import org.springframework.data.redis.connection.RedisSentinelConfiguration;
+import org.springframework.data.redis.connection.RedisServer;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.test.util.RedisSentinelRule;
 import org.springframework.test.annotation.IfProfileValue;
@@ -102,4 +108,15 @@ public class JedisSentinelIntegrationTests extends AbstractConnectionIntegration
 	public void testErrorInTx() {
 		super.testErrorInTx();
 	}
+
+	/**
+	 * @see DATAREDIS-TBD
+	 */
+	@Test
+	public void shouldReadMastersCorrectly() {
+
+		List<RedisServer> servers = (List<RedisServer>) connectionFactory.getSentinelConnection().sentinelMasters();
+		assertThat(servers.size(), is(1));
+	}
+
 }

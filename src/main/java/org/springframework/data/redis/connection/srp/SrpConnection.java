@@ -32,10 +32,10 @@ import java.util.concurrent.Future;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.connection.AbstractRedisConnection;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.FutureResult;
 import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.data.redis.connection.RedisConnection;
 import org.springframework.data.redis.connection.RedisPipelineException;
 import org.springframework.data.redis.connection.RedisSubscribedConnectionException;
 import org.springframework.data.redis.connection.ReturnType;
@@ -67,7 +67,7 @@ import com.google.common.util.concurrent.ListenableFuture;
  * @author Christoph Strobl
  * @author Thomas Darimont
  */
-public class SrpConnection implements RedisConnection {
+public class SrpConnection extends AbstractRedisConnection {
 
 	private static final Object[] EMPTY_PARAMS_ARRAY = new Object[0];
 	private static final byte[] WITHSCORES = "WITHSCORES".getBytes(Charsets.UTF_8);

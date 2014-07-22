@@ -32,13 +32,12 @@ import java.util.concurrent.TimeUnit;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.RedisConnectionFailureException;
+import org.springframework.data.redis.connection.AbstractRedisConnection;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.FutureResult;
 import org.springframework.data.redis.connection.MessageListener;
-import org.springframework.data.redis.connection.NamedNode;
-import org.springframework.data.redis.connection.RedisConnection;
+import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisPipelineException;
-import org.springframework.data.redis.connection.RedisSentinelCommands;
 import org.springframework.data.redis.connection.RedisSubscribedConnectionException;
 import org.springframework.data.redis.connection.RedisZSetCommands;
 import org.springframework.data.redis.connection.ReturnType;
@@ -84,7 +83,7 @@ import redis.clients.util.Pool;
  * @author Christoph Strobl
  * @author Thomas Darimont
  */
-public class JedisConnection implements RedisConnection, RedisSentinelCommands {
+public class JedisConnection extends AbstractRedisConnection {
 
 	private static final Field CLIENT_FIELD;
 	private static final Method SEND_COMMAND;
@@ -3062,17 +3061,6 @@ public class JedisConnection implements RedisConnection, RedisSentinelCommands {
 		}.open();
 	}
 
-	@Override
-	public void sentinelFailover(NamedNode master) {
-
-		Assert.notNull(master, "Master node for sentinel failover must not be null.");
-		Assert.hasText(master.getName(), "Master name for sentinel failover must not be empty or null.");
-		if (isQueueing() || isPipelined()) {
-			throw new UnsupportedOperationException("'SENTINEL FAILOVER' cannot be called in pipeline / transaction mode.");
-		}
-		jedis.sentinelFailover(master.getName());
-	}
-
 	private ScanParams prepareScanParams(ScanOptions options) {
 		ScanParams sp = new ScanParams();
 		if (!options.equals(ScanOptions.NONE)) {
@@ -3117,5 +3105,36 @@ public class JedisConnection implements RedisConnection, RedisSentinelCommands {
 		}
 
 		return args;
+	}
+
+	@Override
+	protected boolean isActive(RedisNode node) {
+
+		if (node == null) {
+			return false;
+		}
+
+		Jedis temp = null;
+		try {
+			temp = getJedis(node);
+			temp.connect();
+			return temp.ping().equalsIgnoreCase("pong");
+		} catch (Exception e) {
+			return false;
+		} finally {
+			if (temp != null) {
+				temp.disconnect();
+				temp.close();
+			}
+		}
+	}
+
+	@Override
+	protected JedisSentinelConnection getSentinelCommands(RedisNode sentinel) {
+		return new JedisSentinelConnection(getJedis(sentinel));
+	}
+
+	protected Jedis getJedis(RedisNode node) {
+		return new Jedis(node.getHost(), node.getPort());
 	}
 }

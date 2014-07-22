@@ -13,18 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.springframework.data.redis.connection;
+package org.springframework.data.redis.connection.convert;
 
-import java.util.Collection;
+import java.util.Map;
+import java.util.Properties;
+
+import org.springframework.core.convert.converter.Converter;
 
 /**
  * @author Christoph Strobl
  * @since 1.4
  */
-public interface RedisSentinelCommands {
+public enum MapToPropertiesConverter implements Converter<Map<?, ?>, Properties> {
+	INSTANCE;
 
-	void sentinelFailover(NamedNode master);
+	@Override
+	public Properties convert(Map<?, ?> source) {
 
-	Collection<RedisServer> sentinelMasters();
+		Properties p = new Properties();
+		if (source != null) {
+			p.putAll(source);
+		}
+		return p;
+	}
 
 }
