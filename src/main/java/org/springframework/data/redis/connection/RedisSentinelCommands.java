@@ -23,8 +23,8 @@ import java.util.Collection;
  */
 public interface RedisSentinelCommands {
 
-	void sentinelFailover(NamedNode master);
+	void failover(NamedNode master);
 
-	Collection<RedisServer> sentinelMasters();
+	Collection<RedisServer> masters();
 
 }

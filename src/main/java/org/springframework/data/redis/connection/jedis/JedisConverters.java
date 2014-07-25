@@ -170,7 +170,7 @@ abstract public class JedisConverters extends Converters {
 	 * @return
 	 * @since 1.4
 	 */
-	public static List<RedisServer> toListOfRedisSentinel(List<Map<String, String>> source) {
+	public static List<RedisServer> toListOfRedisServer(List<Map<String, String>> source) {
 
 		if (CollectionUtils.isEmpty(source)) {
 			return Collections.emptyList();

@@ -23,6 +23,7 @@ import org.springframework.data.redis.connection.NamedNode;
 import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisSentinelConnection;
 import org.springframework.data.redis.connection.RedisServer;
+import org.springframework.util.Assert;
 
 import redis.clients.jedis.Jedis;
 
@@ -43,23 +44,39 @@ public class JedisSentinelConnection implements RedisSentinelConnection, Closeab
 	}
 
 	public JedisSentinelConnection(Jedis jedis) {
+
+		Assert.notNull(jedis, "Cannot created JedisSentinelConnection using 'null' as client.");
 		this.jedis = jedis;
+		init();
 	}
 
 	@Override
-	public void sentinelFailover(NamedNode master) {
+	public void failover(NamedNode master) {
+
+		Assert.notNull(master, "Redis node master must not be 'null' for failover.");
+		Assert.hasText(master.getName(), "Redis master name must not be 'null' or empty for failover.");
 		jedis.sentinelFailover(master.getName());
 
 	}
 
 	@Override
-	public List<RedisServer> sentinelMasters() {
-		return JedisConverters.toListOfRedisSentinel(jedis.sentinelMasters());
+	public List<RedisServer> masters() {
+		return JedisConverters.toListOfRedisServer(jedis.sentinelMasters());
 	}
 
 	@Override
 	public void close() throws IOException {
 		jedis.close();
+	}
+
+	private void init() {
+		if (!jedis.isConnected()) {
+			doInit(jedis);
+		}
+	}
+
+	protected void doInit(Jedis jedis) {
+		jedis.connect();
 	}
 
 }

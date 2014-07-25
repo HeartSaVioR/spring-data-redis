@@ -235,45 +235,6 @@ public class JedisConnectionUnitTestSuite {
 
 	}
 
-	// public static class JedisConnectionSentinelTests extends AbstractConnectionUnitTestBase<Client> {
-	//
-	// protected JedisConnection connection;
-	// private Jedis jedisSpy;
-	//
-	// @Before
-	// public void setUp() {
-	//
-	// jedisSpy = spy(new MockedClientJedis("http://localhost:1234", getNativeRedisConnectionMock()));
-	// connection = new JedisConnection(jedisSpy);
-	// }
-	//
-	// /**
-	// * @see DATAREDIS-324
-	// */
-	// @Test
-	// public void failoverShouldBeSentCorrectly() {
-	//
-	// connection.sentinelFailover(new RedisNodeBuilder().withName("mymaster").build());
-	// verify(jedisSpy, times(1)).sentinelFailover(eq("mymaster"));
-	// }
-	//
-	// /**
-	// * @see DATAREDIS-324
-	// */
-	// @Test(expected = IllegalArgumentException.class)
-	// public void failoverShouldThrowExceptionIfMasterNodeIsNull() {
-	// connection.sentinelFailover(null);
-	// }
-	//
-	// /**
-	// * @see DATAREDIS-324
-	// */
-	// @Test(expected = IllegalArgumentException.class)
-	// public void failoverShouldThrowExceptionIfMasterNodeNameIsEmpty() {
-	// connection.sentinelFailover(new RedisNodeBuilder().build());
-	// }
-	// }
-
 	/**
 	 * {@link Jedis} extension allowing to use mocked object as {@link Client}.
 	 */

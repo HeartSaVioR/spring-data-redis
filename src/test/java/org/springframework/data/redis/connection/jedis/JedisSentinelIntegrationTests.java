@@ -115,7 +115,7 @@ public class JedisSentinelIntegrationTests extends AbstractConnectionIntegration
 	@Test
 	public void shouldReadMastersCorrectly() {
 
-		List<RedisServer> servers = (List<RedisServer>) connectionFactory.getSentinelConnection().sentinelMasters();
+		List<RedisServer> servers = (List<RedisServer>) connectionFactory.getSentinelConnection().masters();
 		assertThat(servers.size(), is(1));
 	}
 
