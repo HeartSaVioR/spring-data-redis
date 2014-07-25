@@ -15,7 +15,12 @@
  */
 package org.springframework.data.redis.connection;
 
+import java.io.Closeable;
 
-public interface RedisSentinelConnection extends RedisSentinelCommands {
+/**
+ * @author Christoph Strobl
+ * @since 1.4
+ */
+public interface RedisSentinelConnection extends RedisSentinelCommands, Closeable {
 
 }

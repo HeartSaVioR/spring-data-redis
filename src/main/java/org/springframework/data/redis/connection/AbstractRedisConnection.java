@@ -18,15 +18,23 @@ package org.springframework.data.redis.connection;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
+/**
+ * @author Christoph Strobl
+ * @since 1.4
+ */
 public abstract class AbstractRedisConnection implements RedisConnection {
 
 	private RedisSentinelConfiguration sentinelConfiguration;
 
+	/*
+	 * (non-Javadoc)
+	 * @see org.springframework.data.redis.connection.RedisConnection#getSentinelCommands()
+	 */
 	@Override
 	public RedisSentinelCommands getSentinelCommands() {
 
 		if (!hasRedisSentinelConfigured()) {
-			throw new InvalidDataAccessResourceUsageException("No sentinels configured");
+			throw new InvalidDataAccessResourceUsageException("No sentinels configured.");
 		}
 
 		return getSentinelCommands(selectActiveSentinel());
@@ -68,7 +76,7 @@ public abstract class AbstractRedisConnection implements RedisConnection {
 	 * @return
 	 */
 	protected RedisSentinelCommands getSentinelCommands(RedisNode sentinel) {
-		throw new UnsupportedOperationException("Fooo");
+		throw new UnsupportedOperationException("Sentinel is not supported by this client.");
 	}
 
 }

@@ -23,7 +23,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.data.redis.connection.RedisNode;
 import org.springframework.data.redis.connection.RedisNode.RedisNodeBuilder;
+import org.springframework.data.redis.connection.RedisServer;
 
 import redis.clients.jedis.Jedis;
 
@@ -94,9 +96,103 @@ public class JedisSentinelConnectionUnitTests {
 	/**
 	 * @see DATAREDIS-330
 	 */
+	@Test
 	public void mastersShouldReadMastersCorrectly() {
+
 		connection.masters();
 		verify(jedisMock, times(1)).sentinelMasters();
+	}
+
+	/**
+	 * @see DATAREDIS-330
+	 */
+	@Test
+	public void shouldReadSlavesCorrectly() {
+
+		connection.slaves("mymaster");
+		verify(jedisMock, times(1)).sentinelSlaves(eq("mymaster"));
+	}
+
+	/**
+	 * @see DATAREDIS-330
+	 */
+	@Test
+	public void shouldReadSlavesCorrectlyWhenGivenNamedNode() {
+
+		connection.slaves(new RedisNodeBuilder().withName("mymaster").build());
+		verify(jedisMock, times(1)).sentinelSlaves(eq("mymaster"));
+	}
+
+	/**
+	 * @see DATAREDIS-330
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void readSlavesShouldThrowExceptionWhenGivenEmptyMasterName() {
+		connection.slaves("");
+	}
+
+	/**
+	 * @see DATAREDIS-330
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void readSlavesShouldThrowExceptionWhenGivenNull() {
+		connection.slaves((RedisNode) null);
+	}
+
+	/**
+	 * @see DATAREDIS-330
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void readSlavesShouldThrowExceptionWhenNodeWithoutName() {
+		connection.slaves(new RedisNodeBuilder().build());
+	}
+
+	/**
+	 * @see DATAREDIS-330
+	 */
+	@Test
+	public void shouldRemoveMasterCorrectlyWhenGivenNamedNode() {
+
+		connection.remove(new RedisNodeBuilder().withName("mymaster").build());
+		verify(jedisMock, times(1)).sentinelRemove(eq("mymaster"));
+	}
+
+	/**
+	 * @see DATAREDIS-330
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void removeShouldThrowExceptionWhenGivenEmptyMasterName() {
+		connection.remove("");
+	}
+
+	/**
+	 * @see DATAREDIS-330
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void removeShouldThrowExceptionWhenGivenNull() {
+		connection.remove((RedisNode) null);
+	}
+
+	/**
+	 * @see DATAREDIS-330
+	 */
+	@Test(expected = IllegalArgumentException.class)
+	public void removeShouldThrowExceptionWhenNodeWithoutName() {
+		connection.remove(new RedisNodeBuilder().build());
+	}
+
+	/**
+	 * @see DATAREDIS-330
+	 */
+	@Test
+	public void monitorShouldBeSentCorrectly() {
+
+		RedisServer server = new RedisServer("127.0.0.1", 6382);
+		server.setName("anothermaster");
+		server.setQuorum(3L);
+
+		connection.monitor(server);
+		verify(jedisMock, times(1)).sentinelMonitor(eq("anothermaster"), eq("127.0.0.1"), eq(6382), eq(3));
 	}
 
 }

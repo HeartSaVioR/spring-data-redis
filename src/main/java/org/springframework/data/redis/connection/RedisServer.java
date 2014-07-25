@@ -57,6 +57,16 @@ public class RedisServer extends RedisNode {
 		setName(get(INFO.NAME));
 	}
 
+	public void setQuorum(Long quorum) {
+
+		if (quorum == null) {
+			this.properties.remove(INFO.QUORUM.key);
+			return;
+		}
+
+		this.properties.put(INFO.QUORUM.key, quorum.toString());
+	}
+
 	public String getRunId() {
 		return get(INFO.RUN_ID);
 	}
