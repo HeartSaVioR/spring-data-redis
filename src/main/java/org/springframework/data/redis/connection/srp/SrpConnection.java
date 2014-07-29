@@ -260,6 +260,8 @@ public class SrpConnection extends AbstractRedisConnection {
 	}
 
 	public void close() throws DataAccessException {
+
+		super.close();
 		isClosed = true;
 		queue.remove(this);
 

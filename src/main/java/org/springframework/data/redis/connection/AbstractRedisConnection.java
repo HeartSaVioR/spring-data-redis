@@ -15,6 +15,10 @@
  */
 package org.springframework.data.redis.connection;
 
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.springframework.dao.DataAccessException;
 import org.springframework.dao.InvalidDataAccessApiUsageException;
 import org.springframework.dao.InvalidDataAccessResourceUsageException;
 
@@ -25,19 +29,26 @@ import org.springframework.dao.InvalidDataAccessResourceUsageException;
 public abstract class AbstractRedisConnection implements RedisConnection {
 
 	private RedisSentinelConfiguration sentinelConfiguration;
+	private ConcurrentHashMap<RedisNode, RedisSentinelConnection> connectionCache = new ConcurrentHashMap<RedisNode, RedisSentinelConnection>();
 
 	/*
 	 * (non-Javadoc)
 	 * @see org.springframework.data.redis.connection.RedisConnection#getSentinelCommands()
 	 */
 	@Override
-	public RedisSentinelCommands getSentinelCommands() {
+	public RedisSentinelConnection getSentinelConnection() {
 
 		if (!hasRedisSentinelConfigured()) {
 			throw new InvalidDataAccessResourceUsageException("No sentinels configured.");
 		}
 
-		return getSentinelCommands(selectActiveSentinel());
+		RedisNode node = selectActiveSentinel();
+		RedisSentinelConnection connection = connectionCache.get(node);
+		if (connection == null || !connection.isOpen()) {
+			connection = getSentinelConnection(node);
+			connectionCache.put(node, connection);
+		}
+		return connection;
 	}
 
 	public void setSentinelConfiguration(RedisSentinelConfiguration sentinelConfiguration) {
@@ -75,8 +86,25 @@ public abstract class AbstractRedisConnection implements RedisConnection {
 	 * @param sentinel
 	 * @return
 	 */
-	protected RedisSentinelCommands getSentinelCommands(RedisNode sentinel) {
+	protected RedisSentinelConnection getSentinelConnection(RedisNode sentinel) {
 		throw new UnsupportedOperationException("Sentinel is not supported by this client.");
+	}
+
+	@Override
+	public void close() throws DataAccessException {
+
+		if (!connectionCache.isEmpty()) {
+			for (RedisNode node : connectionCache.keySet()) {
+				RedisSentinelConnection connection = connectionCache.remove(node);
+				if (connection.isOpen()) {
+					try {
+						connection.close();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}
+		}
 	}
 
 }

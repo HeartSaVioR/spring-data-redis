@@ -97,5 +97,5 @@ public interface RedisConnection extends RedisCommands {
 	 * @return
 	 * @since 1.4
 	 */
-	RedisSentinelCommands getSentinelCommands();
+	RedisSentinelConnection getSentinelConnection();
 }

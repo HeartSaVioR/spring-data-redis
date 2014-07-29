@@ -41,8 +41,6 @@ import org.springframework.data.redis.connection.AbstractRedisConnection;
 import org.springframework.data.redis.connection.DataType;
 import org.springframework.data.redis.connection.MessageListener;
 import org.springframework.data.redis.connection.Pool;
-import org.springframework.data.redis.connection.RedisServerCommands.ShutdownOption;
-import org.springframework.data.redis.connection.RedisStringCommands.BitOperation;
 import org.springframework.data.redis.connection.ReturnType;
 import org.springframework.data.redis.connection.SortParameters;
 import org.springframework.data.redis.connection.Subscription;
@@ -122,6 +120,8 @@ public class JredisConnection extends AbstractRedisConnection {
 	}
 
 	public void close() throws RedisSystemException {
+		super.close();
+
 		if (isClosed()) {
 			return;
 		}

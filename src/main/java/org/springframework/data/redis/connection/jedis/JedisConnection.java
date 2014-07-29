@@ -226,6 +226,7 @@ public class JedisConnection extends AbstractRedisConnection {
 	}
 
 	public void close() throws DataAccessException {
+		super.close();
 		// return the connection to the pool
 		if (pool != null) {
 			if (!broken) {
@@ -3130,7 +3131,7 @@ public class JedisConnection extends AbstractRedisConnection {
 	}
 
 	@Override
-	protected JedisSentinelConnection getSentinelCommands(RedisNode sentinel) {
+	protected JedisSentinelConnection getSentinelConnection(RedisNode sentinel) {
 		return new JedisSentinelConnection(getJedis(sentinel));
 	}
 

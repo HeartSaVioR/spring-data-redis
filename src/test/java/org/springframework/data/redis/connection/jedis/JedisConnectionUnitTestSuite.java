@@ -168,7 +168,7 @@ public class JedisConnectionUnitTestSuite {
 		 */
 		@Test(expected = InvalidDataAccessResourceUsageException.class)
 		public void shouldThrowExceptionWhenAccessingRedisSentinelsCommandsWhenNoSentinelsConfigured() {
-			connection.getSentinelCommands();
+			connection.getSentinelConnection();
 		}
 
 	}

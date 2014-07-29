@@ -154,4 +154,9 @@ public class JedisSentinelConnection implements RedisSentinelConnection {
 		jedis.connect();
 	}
 
+	@Override
+	public boolean isOpen() {
+		return jedis != null && jedis.isConnected();
+	}
+
 }

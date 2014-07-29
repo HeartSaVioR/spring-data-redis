@@ -383,6 +383,6 @@ public class JedisConnectionIntegrationTests extends AbstractConnectionIntegrati
 
 		((JedisConnection) byteConnection).setSentinelConfiguration(new RedisSentinelConfiguration().master("mymaster")
 				.sentinel("127.0.0.1", 26379).sentinel("127.0.0.1", 26380));
-		assertThat(connection.getSentinelCommands(), notNullValue());
+		assertThat(connection.getSentinelConnection(), notNullValue());
 	}
 }

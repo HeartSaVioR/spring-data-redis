@@ -2381,8 +2381,8 @@ public class DefaultStringRedisConnection implements StringRedisConnection {
 	}
 
 	@Override
-	public RedisSentinelCommands getSentinelCommands() {
-		return delegate.getSentinelCommands();
+	public RedisSentinelConnection getSentinelConnection() {
+		return delegate.getSentinelConnection();
 	}
 
 }

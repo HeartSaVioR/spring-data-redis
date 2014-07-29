@@ -351,6 +351,8 @@ public class LettuceConnection extends AbstractRedisConnection {
 	}
 
 	public void close() throws DataAccessException {
+		super.close();
+
 		isClosed = true;
 
 		if (asyncDedicatedConn != null) {
